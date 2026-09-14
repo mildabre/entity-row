@@ -146,7 +146,7 @@ abstract class Repository implements Reflectable
     }
 
     /**
-     * @deprecated Selection::insert() is deprecated - use insertOne() for a single row or insertMulti() for multiple rows / insert-select.
+     * @deprecated Selection::insert() is deprecated - use insertOne() for a single row or insertMulti() for multiple rows or insert-select.
      */
     public function insert(iterable $data): never
     {
