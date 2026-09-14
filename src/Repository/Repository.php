@@ -103,7 +103,7 @@ abstract class Repository implements Reflectable
     {
         if (array_is_list($data)) {
             throw new LogicException(sprintf(
-                '%s::insertOne() has got a list of rows instead of one row (column => value). For inserting multiple rows use insertMany().',
+                '%s::insertOne() has got a list of rows instead of one row (column => value). For inserting multiple rows use insertMulti().',
                 static::class,
             ));
         }
@@ -129,7 +129,7 @@ abstract class Repository implements Reflectable
             $result = $this->rawInsert($rows);
 
             return is_int($result) ? $result : throw new LogicException(sprintf(
-                '%s::insertMany() - insert-select unexpectedly did not return a row count.',
+                '%s::insertMulti() - insert-select unexpectedly did not return a row count.',
                 static::class,
             ));
         }
