@@ -123,7 +123,7 @@ abstract class Repository implements Reflectable
     /**
      * @param iterable<int, array<string, mixed>>|Selection<T> $rows
      */
-    public function insertMany(iterable|Selection $rows): int
+    public function insertMulti(iterable|Selection $rows): int
     {
         if ($rows instanceof Selection) {
             $result = $this->rawInsert($rows);
@@ -146,11 +146,11 @@ abstract class Repository implements Reflectable
     }
 
     /**
-     * @deprecated Selection::insert() is deprecated - use insertOne() for a single row or insertMany() for multiple rows / insert-select.
+     * @deprecated Selection::insert() is deprecated - use insertOne() for a single row or insertMulti() for multiple rows / insert-select.
      */
     public function insert(iterable $data): never
     {
-        throw new BadMethodCallException(sprintf('%s::insert() is not recommended to use - use insertOne() or insertMany().',static::class));
+        throw new BadMethodCallException(sprintf('%s::insert() is not recommended to use - use insertOne() or insertMulti().',static::class));
     }
 
     private function assertEntityRow(?ActiveRow $row): ?EntityRow
