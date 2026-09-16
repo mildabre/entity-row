@@ -101,6 +101,10 @@ abstract class Repository implements Reflectable
      */
     public function insertOne(array $data): EntityRow
     {
+        if ($data === []) {
+            throw new LogicException(sprintf('%s::insertOne() called with empty $data.', static::class));
+        }
+
         if (array_is_list($data)) {
             throw new LogicException(sprintf(
                 '%s::insertOne() has got a list of rows instead of one row (column => value). For inserting multiple rows use insertMulti().',
