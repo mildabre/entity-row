@@ -7,6 +7,7 @@ namespace Bite\EntityRow\Entity;
 use BadMethodCallException;
 use LogicException;
 use Bite\EntityRow\Explorer\TypedExplorer;
+use Nette\Database\Explorer;
 use Nette\Database\Table\ActiveRow;
 use Nette\Database\Table\Selection;
 
@@ -77,6 +78,39 @@ abstract class EntityRow extends ActiveRow
         }
 
         return $explorer;
+    }
+
+    /**
+     * @var array<string, array<string, true>>  table name => column name => true
+     */
+    private static array $columnsCache = [];
+
+    public static function tableHasColumn(Explorer $explorer, string $table, string $column): bool          // safe inspection of column presence
+    {
+        $columns = self::$columnsCache[$table] ??= array_column(
+            $explorer->getStructure()->getColumns($table),
+            null,
+            'name',
+        );
+
+        return isset($columns[$column]);
+    }
+
+    public function hasColumn(string $column): bool
+    {
+        return self::tableHasColumn($this->getExplorer(), $this->getTable()->getName(), $column);
+    }
+
+    public function readColumn(string $column): mixed                               // safe reading of any column
+    {
+        if (!$this->hasColumn($column)) {
+            throw new LogicException(sprintf(
+                '%s: sloupec "%s" na tabulce "%s" neexistuje.',
+                static::class, $column, $this->getTable()->getName(),
+            ));
+        }
+
+        return $this->{$column};
     }
 
     public function ref(string $key, ?string $throughColumn = null): never
