@@ -8,7 +8,7 @@ use ReflectionClass;
 
 interface Reflectable
 {
-    public static function reflection(): ReflectionClass;
+    public static function getReflection(): ReflectionClass;
 
-    public static function reflector(): Reflector;
+    public static function getReflector(): Reflector;
 }

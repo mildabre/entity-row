@@ -26,12 +26,12 @@ abstract class Repository implements Reflectable
      */
     private static array $reflectionCache = [];
 
-    public static function reflection(): ReflectionClass
+    public static function getReflection(): ReflectionClass
     {
         return self::$reflectionCache[static::class] ??= new ReflectionClass(static::class);
     }
 
-    public static function reflector(): RepositoryReflector         // no instance required, subclasses may narrow return type
+    public static function getReflector(): RepositoryReflector         // no instance required, subclasses may narrow return type
     {
         return RepositoryReflector::for(static::class);
     }
@@ -44,7 +44,7 @@ abstract class Repository implements Reflectable
     }
 
     protected TypedExplorer $explorer {
-        get => $this->explorer ??= $this->explorerLocator->get(static::reflector()->connectionName);
+        get => $this->explorer ??= $this->explorerLocator->get(static::getReflector()->connectionName);
     }
 
     /**
@@ -84,7 +84,7 @@ abstract class Repository implements Reflectable
      */
     public function findAll(): Selection
     {
-        return $this->explorer->table(static::reflector()->table);
+        return $this->explorer->table(static::getReflector()->table);
     }
 
     /**
@@ -113,12 +113,12 @@ abstract class Repository implements Reflectable
         }
 
         $row = $this->rawInsert($data);
-        $entityClass = static::reflector()->entityClass;
+        $entityClass = static::getReflector()->entityClass;
 
         if (!$row instanceof EntityRow || !$row instanceof $entityClass) {
             throw new LogicException(sprintf(
                 '%s::insertOne() - insert did not return an instance of %s (got %s). Table %s must have an autoincrement primary key, or you must supply the primary key value(s) explicitly in $data.',
-                static::class, $entityClass, get_debug_type($row), static::reflector()->table,
+                static::class, $entityClass, get_debug_type($row), static::getReflector()->table,
             ));
         }
         return $row;
@@ -165,7 +165,7 @@ abstract class Repository implements Reflectable
 
         return $row instanceof EntityRow ? $row : throw new LogicException(sprintf(
             '%s: row from table "%s" is not an instance of %s (got %s). Check the entity map configuration for this connection.',
-            static::class, static::reflector()->table, EntityRow::class, get_debug_type($row),
+            static::class, static::getReflector()->table, EntityRow::class, get_debug_type($row),
         ));
     }
 
