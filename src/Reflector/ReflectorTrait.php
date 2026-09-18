@@ -26,7 +26,7 @@ trait ReflectorTrait
     public static function for(string $class): static
     {
         $cacheKey = static::class . ':' . $class;
-        return self::$classCache[$cacheKey] ??= new static($class::reflection());
+        return self::$classCache[$cacheKey] ??= new static($class::getReflectionClass());
     }
 
     protected function __construct(ReflectionClass $reflection)
