@@ -22,6 +22,6 @@ trait CheckReflectable
      */
     protected function reflectionFor(string $class): ReflectionClass
     {
-        return $this->isReflectable($class) ? $class::reflection() : new ReflectionClass($class);
+        return $this->isReflectable($class) ? $class::getReflectionClass() : new ReflectionClass($class);
     }
 }
