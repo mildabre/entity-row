@@ -26,7 +26,7 @@ abstract class Repository implements Reflectable
      */
     private static array $reflectionCache = [];
 
-    public static function getReflection(): ReflectionClass
+    public static function getReflectionClass(): ReflectionClass
     {
         return self::$reflectionCache[static::class] ??= new ReflectionClass(static::class);
     }
