@@ -10,14 +10,11 @@ use Bite\EntityRow\Explorer\TypedExplorer;
 use Nette\Database\Explorer;
 use Nette\Database\Table\ActiveRow;
 use Nette\Database\Table\Selection;
+use ReflectionClass;
 
 abstract class EntityRow extends ActiveRow
 {
     /**
-     * Deterministický ekvivalent ActiveRow::ref() - tabulku odvozuje z entity třídy,
-     * FK sloupec buď převezme explicitně, nebo ho dohledá introspekcí schématu
-     * (pokud existuje právě jedna FK vedoucí na cílovou tabulku).
-     *
      * @template T of EntityRow
      * @param class-string<T> $entityClass
      * @return T|null
@@ -50,9 +47,6 @@ abstract class EntityRow extends ActiveRow
     }
 
     /**
-     * Deterministický ekvivalent ActiveRow::related() - child tabulku odvozuje z entity
-     * třídy, FK sloupec buď převezme explicitně, nebo ho dohledá introspekcí schématu
-     * (pokud existuje právě jedna FK z child tabulky zpět na tuto tabulku).
      * @template T of EntityRow
      * @param class-string<T> $entityClass
      * @return Selection<T>
@@ -85,7 +79,7 @@ abstract class EntityRow extends ActiveRow
      */
     private static array $columnsCache = [];
 
-    public static function tableHasColumn(Explorer $explorer, string $table, string $column): bool          // safe inspection of column presence
+    public static function hasTableColumn(Explorer $explorer, string $table, string $column): bool          // safe inspection of column presence
     {
         $columns = self::$columnsCache[$table] ??= array_column(
             $explorer->getStructure()->getColumns($table),
@@ -98,7 +92,7 @@ abstract class EntityRow extends ActiveRow
 
     public function hasColumn(string $column): bool
     {
-        return self::tableHasColumn($this->getExplorer(), $this->getTable()->getName(), $column);
+        return self::hasTableColumn($this->getExplorer(), $this->getTable()->getName(), $column);
     }
 
     public function readColumn(string $column): mixed                               // safe reading of any column
@@ -113,11 +107,32 @@ abstract class EntityRow extends ActiveRow
         return $this->{$column};
     }
 
+    /**
+     * @var array<class-string<EntityRow>, SortColumn|null>
+     */
+    private static array $sortColumnCache = [];
+
+    public static function getSortColumn(): ?SortColumn
+    {
+        if (!array_key_exists(static::class, self::$sortColumnCache)) {
+            $attribute = new ReflectionClass(static::class)->getAttributes(SortColumn::class)[0] ?? null;
+            self::$sortColumnCache[static::class] = $attribute?->newInstance();
+        }
+
+        return self::$sortColumnCache[static::class];
+    }
+
+    /**
+     * @deprecated
+     */
     public function ref(string $key, ?string $throughColumn = null): never
     {
         throw new BadMethodCallException("Method ActiveRow::ref() is disabled on EntityRow, use entity reference property instead.");
     }
 
+    /**
+     * @deprecated
+     */
     public function related(string $key, ?string $throughColumn = null): never
     {
         throw new BadMethodCallException("Method ActiveRow::related() is disabled on EntityRow, use entity related property instead.");
