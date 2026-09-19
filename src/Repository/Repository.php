@@ -36,6 +36,11 @@ abstract class Repository implements Reflectable
         return RepositoryReflector::for(static::class);
     }
 
+    protected function getRepository(): static
+    {
+        return $this;
+    }
+
     private ExplorerLocator $explorerLocator;
 
     final public function injectExplorerLocator(ExplorerLocator $explorerLocator): void
