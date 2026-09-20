@@ -12,6 +12,6 @@ final class Sort
     public function __construct(
         public readonly string $column = 'sort',
         public readonly int $initial = 0,
-        public readonly ?string $groupBy = null,
+        public readonly ?string $parentKey = null,
     ) {}
 }
