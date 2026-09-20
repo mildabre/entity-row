@@ -7,7 +7,7 @@ namespace Bite\EntityRow\Entity;
 use Attribute;
 
 #[Attribute(Attribute::TARGET_CLASS)]
-final class SortColumn
+final class Sort
 {
     public function __construct(
         public readonly string $column = 'sort',

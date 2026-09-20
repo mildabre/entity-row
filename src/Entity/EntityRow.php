@@ -108,18 +108,18 @@ abstract class EntityRow extends ActiveRow
     }
 
     /**
-     * @var array<class-string<EntityRow>, SortColumn|null>
+     * @var array<class-string<EntityRow>, Sort|null>
      */
-    private static array $sortColumnCache = [];
+    private static array $sortCache = [];
 
-    public static function getSortColumn(): ?SortColumn
+    public static function getSort(): ?Sort
     {
-        if (!array_key_exists(static::class, self::$sortColumnCache)) {
-            $attribute = new ReflectionClass(static::class)->getAttributes(SortColumn::class)[0] ?? null;
-            self::$sortColumnCache[static::class] = $attribute?->newInstance();
+        if (!array_key_exists(static::class, self::$sortCache)) {
+            $attribute = new ReflectionClass(static::class)->getAttributes(Sort::class)[0] ?? null;
+            self::$sortCache[static::class] = $attribute?->newInstance();
         }
 
-        return self::$sortColumnCache[static::class];
+        return self::$sortCache[static::class];
     }
 
     /**
