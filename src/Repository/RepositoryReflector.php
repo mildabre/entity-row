@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Bite\EntityRow\Repository;
 
+use Bite\EntityRow\Entity\EntityRow;
 use Bite\EntityRow\Reflector\Reflector;
 use Bite\EntityRow\Reflector\ReflectorTrait;
 
@@ -21,7 +22,7 @@ class RepositoryReflector implements Reflector
     }
 
     /**
-     * @var class-string
+     * @var class-string<EntityRow>
      */
     public string $entityClass {
         get => $this->entityClass ??= EntityConvention::resolveEntityClass($this->reflection);
