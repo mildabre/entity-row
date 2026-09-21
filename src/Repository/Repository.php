@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Bite\EntityRow\Repository;
 
 use BadMethodCallException;
+use Bite\EntityRow\Reflector\ReflectionClassTrait;
 use DateTimeInterface;
 use LogicException;
 use Bite\EntityRow\Entity\EntityRow;
@@ -14,31 +15,17 @@ use Bite\EntityRow\Reflector\Reflectable;
 use Nette\Application\BadRequestException;
 use Nette\Database\Table\ActiveRow;
 use Nette\Database\Table\Selection;
-use ReflectionClass;
 
 /**
  * @template T of EntityRow
  */
 abstract class Repository implements Reflectable
 {
-    /**
-     * @var array<class-string<Repository>, ReflectionClass>
-     */
-    private static array $reflectionCache = [];
-
-    public static function getReflectionClass(): ReflectionClass
-    {
-        return self::$reflectionCache[static::class] ??= new ReflectionClass(static::class);
-    }
+    use ReflectionClassTrait;
 
     public static function getReflector(): RepositoryReflector         // no instance required, subclasses may narrow return type
     {
         return RepositoryReflector::for(static::class);
-    }
-
-    protected function getRepository(): static
-    {
-        return $this;
     }
 
     private ExplorerLocator $explorerLocator;
