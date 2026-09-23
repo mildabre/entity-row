@@ -10,7 +10,6 @@ use Bite\EntityRow\Explorer\TypedExplorer;
 use Nette\Database\Explorer;
 use Nette\Database\Table\ActiveRow;
 use Nette\Database\Table\Selection;
-use ReflectionClass;
 
 abstract class EntityRow extends ActiveRow
 {
@@ -105,21 +104,6 @@ abstract class EntityRow extends ActiveRow
         }
 
         return $this->{$column};
-    }
-
-    /**
-     * @var array<class-string<EntityRow>, Sort|null>
-     */
-    private static array $sortCache = [];
-
-    public static function getSort(): ?Sort
-    {
-        if (!array_key_exists(static::class, self::$sortCache)) {
-            $attribute = new ReflectionClass(static::class)->getAttributes(Sort::class)[0] ?? null;
-            self::$sortCache[static::class] = $attribute?->newInstance();
-        }
-
-        return self::$sortCache[static::class];
     }
 
     /**
