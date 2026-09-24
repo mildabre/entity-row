@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Bite\EntityRow\Repository;
 
-enum ThrowOnFail
+enum OnFail
 {
     case BadRequestException;
     case RuntimeException;
