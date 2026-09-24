@@ -15,6 +15,7 @@ use Bite\EntityRow\Reflector\Reflectable;
 use Nette\Application\BadRequestException;
 use Nette\Database\Table\ActiveRow;
 use Nette\Database\Table\Selection;
+use RuntimeException;
 
 /**
  * @template T of EntityRow
@@ -50,9 +51,12 @@ abstract class Repository implements Reflectable
     /**
      * @return  T
      */
-    public function findOrFail(?int $id, bool $rowNotFoundException = false): EntityRow
+    public function findOrFail(?int $id, OnFail $onFail): EntityRow
     {
-        return $this->find($id) ?? throw ($rowNotFoundException ? new RowNotFoundException() : new BadRequestException());
+        return $this->find($id) ?? throw match ($onFail) {
+            OnFail::BadRequestException => new BadRequestException(),
+            OnFail::RuntimeException => new RuntimeException(),
+        };
     }
 
     /**
