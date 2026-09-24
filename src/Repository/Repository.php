@@ -51,11 +51,11 @@ abstract class Repository implements Reflectable
     /**
      * @return  T
      */
-    public function findOrFail(?int $id, OnFail $onFail): EntityRow
+    public function findOrFail(?int $id, OnFail $onFail, ?string $message = null): EntityRow
     {
         return $this->find($id) ?? throw match ($onFail) {
-            OnFail::BadRequestException => new BadRequestException(),
-            OnFail::RuntimeException => new RuntimeException(),
+            OnFail::BadRequestException => new BadRequestException($message ?? 'Page not found'),
+            OnFail::RuntimeException => new RuntimeException($message ?? 'Row not found'),
         };
     }
 
