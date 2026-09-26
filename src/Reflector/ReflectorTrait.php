@@ -48,21 +48,29 @@ trait ReflectorTrait
         get => str_ends_with($this->shortName, $this->getRequiredSuffix());
     }
 
+    private array $traitNames {
+        get => $this->traitNames ??= $this->collectTraitNames();
+    }
+
     public function hasTrait(string $class): bool
     {
+        return array_key_exists($class, $this->traitNames);
+    }
+
+    private function collectTraitNames(): array
+    {
+        $names = [];
         for ($rc = $this->reflection; $rc !== false; $rc = $rc->getParentClass()) {
             $stack = $rc->getTraitNames();
-
             while ($stack) {
                 $trait = array_pop($stack);
-                if ($trait === $class) {
-                    return true;
+                if (!isset($names[$trait])) {
+                    $names[$trait] = true;
+                    array_push($stack, ...array_values(class_uses($trait)));
                 }
-                array_push($stack, ...array_values(class_uses($trait)));
             }
         }
-
-        return false;
+        return $names;
     }
 
     public function getAttribute(string $class): ?ReflectionAttribute
