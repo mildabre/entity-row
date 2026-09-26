@@ -50,13 +50,16 @@ trait ReflectorTrait
 
     public function hasTrait(string $class): bool
     {
-        $rc = $this->reflection;
+        for ($rc = $this->reflection; $rc !== false; $rc = $rc->getParentClass()) {
+            $stack = $rc->getTraitNames();
 
-        while ($rc !== false) {
-            if (in_array($class, $rc->getTraitNames())) {
-                return true;
+            while ($stack) {
+                $trait = array_pop($stack);
+                if ($trait === $class) {
+                    return true;
+                }
+                array_push($stack, ...array_values(class_uses($trait)));
             }
-            $rc = $rc->getParentClass();
         }
 
         return false;
