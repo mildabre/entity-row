@@ -93,17 +93,19 @@ trait ReflectorTrait
         return $this->getAttribute($class) !== null;
     }
 
+    private array $injectedProperties;
+
     /**
      * @return list<ReflectionProperty>
      */
     public function getInjectedProperties(): array
     {
-        $properties = array_merge($this->scanPromotedProperties(), $this->scanAttributeInjectedProperties());
-        return array_values(array_reduce(
-            $properties,
-            fn(array $unique, ReflectionProperty $property) => $unique + [$property->name => $property],
-            [],
-        ));
+        if (!isset($this->injectedProperties)) {
+            $properties = array_merge($this->scanPromotedProperties(), $this->scanAttributeInjectedProperties());
+            $reduced = array_reduce($properties, fn(array $unique, ReflectionProperty $property) => $unique + [$property->name => $property],[]);
+            $this->injectedProperties = array_values($reduced);
+        }
+        return $this->injectedProperties;
     }
 
     private function scanPromotedProperties(): array
