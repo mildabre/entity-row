@@ -101,14 +101,12 @@ trait ReflectorTrait
     public function getInjectedProperties(): array
     {
         if (!isset($this->injectedProperties)) {
-            $properties = array_merge($this->scanPromotedProperties(), $this->scanAttributeInjectedProperties());
-            $reduced = array_reduce($properties, fn(array $unique, ReflectionProperty $property) => $unique + [$property->name => $property],[]);
-            $this->injectedProperties = array_values($reduced);
+            $this->injectedProperties = array_merge($this->scanConstructorPromotedProperties(), $this->scanAttributeInjectedProperties());
         }
         return $this->injectedProperties;
     }
 
-    private function scanPromotedProperties(): array
+    private function scanConstructorPromotedProperties(): array
     {
         $constructor = $this->reflection->getConstructor();
 
@@ -130,7 +128,11 @@ trait ReflectorTrait
     {
         return array_filter(
             $this->reflection->getProperties(),
-            fn(ReflectionProperty $p) => $p->getAttributes(Inject::class) && $p->getType() instanceof ReflectionNamedType && !$p->getType()->isBuiltIn()
+            fn(ReflectionProperty $property) =>
+                $property->getAttributes(Inject::class)
+                && $property->getType() instanceof ReflectionNamedType
+                && !$property->getType()->isBuiltIn()
+                && !$property->isPromoted()
         );
     }
 }
