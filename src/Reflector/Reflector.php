@@ -9,6 +9,8 @@ use ReflectionProperty;
 
 interface Reflector
 {
+    public string $name { get; }
+
     public string $shortName { get; }
 
     public string $prefix { get; }

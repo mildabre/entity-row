@@ -36,6 +36,10 @@ trait ReflectorTrait
 
     abstract public function getRequiredSuffix(): string;
 
+    public string $name {
+        get => $this->reflection->getName();
+    }
+
     public string $shortName {
         get => $this->reflection->getShortName();
     }
