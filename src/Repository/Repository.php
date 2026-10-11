@@ -55,7 +55,8 @@ abstract class Repository implements Reflectable
      */
     public function find(?int $id): ?EntityRow
     {
-        return $id !== null ? $this->assertEntityRow($this->findAll()->get($id)) : null;
+        $row = $id !== null ? $this->findAll()->get($id) : null;
+        return $row ? $this->requireEntity($row) : null;
     }
 
     /**
@@ -74,7 +75,8 @@ abstract class Repository implements Reflectable
      */
     public function findOneBy(string $column, ?string $value): ?EntityRow
     {
-        return $value !== null ? $this->assertEntityRow($this->findAll()->where($column, $value)->fetch()) : null;
+        $row = $value !== null ? $this->findAll()->where($column, $value)->fetch() : null;
+        return $row ? $this->requireEntity($row) : null;
     }
 
     /**
@@ -82,10 +84,7 @@ abstract class Repository implements Reflectable
      */
     public function findOneByOrFail(string $column, ?string $value, OnFail $onFail, ?string $message = null): EntityRow
     {
-        return $this->findOneBy($column, $value) ?? throw match ($onFail) {
-            OnFail::BadRequestException => new BadRequestException($message ?? 'Page not found'),
-            OnFail::RuntimeException => new RuntimeException($message ?? 'Row not found'),
-        };
+        return $this->findOneBy($column, $value) ?? throw self::notFoundException($onFail, $message);
     }
 
     /**
@@ -166,15 +165,13 @@ abstract class Repository implements Reflectable
         throw new BadMethodCallException(sprintf('%s::insert() is not recommended to use - use insertOne() or insertMulti().',static::class));
     }
 
-    private function assertEntityRow(?ActiveRow $row): ?EntityRow
+    private function requireEntity(ActiveRow $row): EntityRow
     {
-        if ($row === null) {
-            return null;
-        }
+        $entityClass = static::getReflector()->entityClass;
 
-        return $row instanceof EntityRow ? $row : throw new LogicException(sprintf(
+        return $row instanceof EntityRow && $row instanceof $entityClass ? $row : throw new LogicException(sprintf(
             '%s: row from table "%s" is not an instance of %s (got %s). Check the entity map configuration for this connection.',
-            static::class, static::getReflector()->table, EntityRow::class, get_debug_type($row),
+            static::class, static::getReflector()->table, $entityClass, get_debug_type($row),
         ));
     }
 
@@ -184,5 +181,13 @@ abstract class Repository implements Reflectable
     private function rawInsert(iterable|Selection $data): array|int|ActiveRow
     {
         return $this->findAll()->insert($data);
+    }
+
+    private static function notFoundException(OnFail $onFail, ?string $message): BadRequestException|RuntimeException
+    {
+        return match ($onFail) {
+            OnFail::BadRequestException => new BadRequestException($message ?? 'Page not found'),
+            OnFail::RuntimeException => new RuntimeException($message ?? 'Row not found'),
+        };
     }
 }
