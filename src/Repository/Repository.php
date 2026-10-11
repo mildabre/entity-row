@@ -6,7 +6,7 @@ namespace Bite\EntityRow\Repository;
 
 use BadMethodCallException;
 use Bite\EntityRow\Reflector\ReflectionClassTrait;
-use DateTimeInterface;
+use Closure;
 use LogicException;
 use Bite\EntityRow\Entity\EntityRow;
 use Bite\EntityRow\Explorer\ExplorerLocator;
@@ -41,6 +41,16 @@ abstract class Repository implements Reflectable
     }
 
     /**
+     * @template R
+     * @param Closure(): R $closure
+     * @return R
+     */
+    public function transaction(Closure $closure): mixed
+    {
+        return $this->explorer->transaction(fn() => $closure());
+    }
+
+    /**
      * @return  T|null
      */
     public function find(?int $id): ?EntityRow
@@ -62,17 +72,20 @@ abstract class Repository implements Reflectable
     /**
      * @return  T|null
      */
-    public function findOneBy(string $column, string|int|float|bool|array|DateTimeInterface|null $value): ?EntityRow
+    public function findOneBy(string $column, ?string $value): ?EntityRow
     {
-        return $this->assertEntityRow($this->findAll()->where($column, $value)->fetch());
+        return $value !== null ? $this->assertEntityRow($this->findAll()->where($column, $value)->fetch()) : null;
     }
 
     /**
      * @return  T
      */
-    public function findOneByOrFail(string $column, string|int|float|bool|array|DateTimeInterface|null $value, bool $rowNotFoundException = false): EntityRow
+    public function findOneByOrFail(string $column, ?string $value, OnFail $onFail, ?string $message = null): EntityRow
     {
-        return $this->findOneBy($column, $value) ?? throw ($rowNotFoundException ? new RowNotFoundException() : new BadRequestException());
+        return $this->findOneBy($column, $value) ?? throw match ($onFail) {
+            OnFail::BadRequestException => new BadRequestException($message ?? 'Page not found'),
+            OnFail::RuntimeException => new RuntimeException($message ?? 'Row not found'),
+        };
     }
 
     /**
